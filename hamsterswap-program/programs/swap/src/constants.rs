@@ -1,0 +1,6 @@
+
+// Define constant Platform seend
+pub const PLATFORM_SEED: &[u8] = b"SEED::SWAP::PLATFORM";
+pub const TOKEN_ACCOUNT_SEED: &[u8] = b"SEED::SWAP::TOKEN_VAULT_SEED";
+pub const PROPOSAL_SEED: &[u8] = b"SEED::SWAP::PROPOSAL_SEED";
+pub const LOOKUP_TABLE_SEED: &[u8] = b"SEED::SWAP::LOOKUP_TABLE_SEED";
