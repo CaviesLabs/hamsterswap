@@ -1,5 +1,5 @@
 use crate::*;
-use std::borrow::{Borrow, BorrowMut};
+use std::borrow::{BorrowMut};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Default, Clone, Debug, PartialEq)]
 pub enum ActionType {
@@ -75,7 +75,7 @@ impl<'info> TransferAssetsToVaultContext<'info> {
         }
 
         // find the swap item
-        let mut item = swap_proposal.offered_items
+        let item = swap_proposal.offered_items
             .iter_mut()
             .find(|x| x.id == params.swap_item_id)
             .unwrap();
@@ -157,7 +157,7 @@ impl<'info> TransferAssetsToVaultContext<'info> {
             .unwrap();
 
         // find the swap item
-        let mut item = desired_option.asking_items
+        let item = desired_option.asking_items
             .iter_mut()
             .find(|x| x.id == current_params.swap_item_id.clone())
             .unwrap();

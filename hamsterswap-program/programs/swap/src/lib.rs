@@ -4,7 +4,6 @@ use anchor_lang::solana_program::{system_program, sysvar};
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
 use arrayref::array_ref;
-use solana_address_lookup_table_program::*;
 
 pub mod action;
 pub mod error;
@@ -18,7 +17,6 @@ pub use constants::*;
 pub use error::*;
 pub use state::*;
 pub use event::*;
-pub use macros::*;
 
 declare_id!("EdeRcNsVGU1s1NXZZo8FhLD8iePxvoUCdbvwVGnj778f");
 

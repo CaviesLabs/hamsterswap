@@ -1,4 +1,3 @@
-use std::borrow::Borrow;
 use anchor_lang::solana_program;
 use crate::*;
 
@@ -48,7 +47,7 @@ impl<'info> CreateAddressLookupTableContext<'info> {
         let lookup_table_registry = self.lookup_table_registry.borrow_mut();
 
         let (create_ix, table_pk) =
-            instruction::create_lookup_table(
+            solana_address_lookup_table_program::instruction::create_lookup_table(
                 self.signer.key(),
                 self.signer.key(),
                 slot,

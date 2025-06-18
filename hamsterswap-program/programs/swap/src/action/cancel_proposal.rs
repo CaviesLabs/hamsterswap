@@ -18,14 +18,14 @@ pub struct CancelProposalContext<'info> {
         seeds = [PROPOSAL_SEED, params.id.as_bytes().as_ref()],
         bump = swap_proposal.bump,
     )]
-    pub swap_proposal: Account<'info, SwapProposal>,
+    pub swap_proposal: Box<Account<'info, SwapProposal>>,
 
     #[account(address = system_program::ID)]
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> CancelProposalContext<'info> {
-    pub fn execute(&mut self, params: CancelProposalParams) -> Result<()> {
+    pub fn execute(&mut self, _params: CancelProposalParams) -> Result<()> {
         if self.swap_proposal.is_proposal_cancelable_for(&self.signer.key) {
             self.swap_proposal.status = SwapProposalStatus::Canceled;
 

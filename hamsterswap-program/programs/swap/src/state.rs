@@ -1,6 +1,4 @@
 use crate::*;
-use std::borrow::Borrow;
-use solana_address_lookup_table_program::state::AddressLookupTable;
 
 // ================ Swap Platform Config ================ //
 // Here we define the account state that holds the administration info.
@@ -70,8 +68,7 @@ impl SwapPlatformRegistry {
     pub fn get_mint_info(&self, mint_account: Pubkey) -> &MintInfo {
         return self.allowed_mint_accounts.iter()
             .find(|&mint_account_key| mint_account_key.mint_account == mint_account.key().clone())
-            .unwrap()
-            .borrow();
+            .unwrap();
     }
 }
 
@@ -127,18 +124,6 @@ pub struct SwapItem {
 
 // Implement the swap item functions
 impl SwapItem {
-    // Define default value
-    fn default() -> SwapItem {
-        SwapItem {
-            id: String::default(),
-            owner: Pubkey::default(),
-            mint_account: Pubkey::default(),
-            item_type: SwapItemType::NFT,
-            status: SwapItemStatus::Created,
-            amount: 0,
-        }
-    }
-
     // Define deposit function
     pub fn handle_post_deposited(&mut self) {
         self.status = SwapItemStatus::Deposited;
