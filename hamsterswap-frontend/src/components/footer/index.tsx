@@ -1,5 +1,6 @@
 import { FC, useMemo } from "react";
 import { useRouter } from "next/router";
+import { CaviesIcon } from "../icons";
 
 interface FooterItem {
   name: string;
@@ -71,10 +72,7 @@ const Footer: FC = () => {
             <div className="flex mx-auto mt-[14px] justify-center items-start">
               <div className="top-0 regular-text text-[14px] mr-[5px]">by</div>
               <a href="https://cavies.xyz/" target="_blank">
-                <img
-                  src="https://cavies.xyz/assets/images/logo.png"
-                  className="w-[110px] h-auto"
-                />
+                <CaviesIcon className="w-[110px] h-auto" />
               </a>
             </div>
           </div>
@@ -96,7 +94,7 @@ const Footer: FC = () => {
             </ul>
             <div className="bottom-menu-wrapper hidden md:block">
               <p className="text-footerItemColor dark:text-footerItemColorDark text-[12px] md:text-[14px] regular-text">
-                © 2022 Cavies Ltd.
+                © 2025 Cavies Ltd.
               </p>
             </div>
           </div>
@@ -120,7 +118,7 @@ const Footer: FC = () => {
           </div>
           <div className="pt-[20px]">
             <p className="text-footerItemColor dark:text-footerItemColorDark text-[12px] md:text-[14px] cursor-pointer normal-text text-center">
-              © 2022 Cavies Ltd.
+              © 2025 Cavies Ltd.
             </p>
           </div>
         </div>
