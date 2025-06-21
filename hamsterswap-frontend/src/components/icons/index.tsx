@@ -67,7 +67,6 @@ export const CaviesIcon: FC<IconProps> = (props) => (
   </svg>
 );
 
-
 /** @dev Expore Plus Icon Component */
 export const PlusIcon: FC<IconProps> = (props) => {
   return (

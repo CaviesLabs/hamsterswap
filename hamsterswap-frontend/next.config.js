@@ -17,11 +17,7 @@ const config = withPWA({
   reactStrictMode: true,
   experimental: {
     esmExternals: true,
-    transpilePackages: [
-      "antd",
-      "@hamsterbox/ui-kit",
-      "@solana/wallet-adapter-base",
-    ],
+    transpilePackages: ["antd", "@hamsterbox/ui-kit"],
   },
   env: {
     ENV: NODE_ENV,

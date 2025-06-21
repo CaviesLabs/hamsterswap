@@ -71,7 +71,11 @@ const Footer: FC = () => {
             />
             <div className="flex mx-auto mt-[14px] justify-center items-start">
               <div className="top-0 regular-text text-[14px] mr-[5px]">by</div>
-              <a href="https://cavies.xyz/" target="_blank">
+              <a
+                href="https://cavies.xyz/"
+                target="_blank"
+                className="bg-[#000] rounded-[4px] p-[2px]"
+              >
                 <CaviesIcon className="w-[110px] h-auto" />
               </a>
             </div>
