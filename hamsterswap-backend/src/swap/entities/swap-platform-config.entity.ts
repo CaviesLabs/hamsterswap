@@ -50,7 +50,7 @@ export class WhitelistedCollection {
 
 export enum ChainId {
   Solana = 'solana',
-  Klaytn = 'klaytn',
+  Sei = 'sei',
 }
 export class WhitelistedCurrency {
   currencyId: string;
@@ -77,6 +77,6 @@ export class EVMChainConfig {
 }
 
 export class ChainConfigEntity {
-  [ChainId.Solana]: SolanaConfig;
-  // [ChainId.Klaytn]: EVMChainConfig;
+  // [ChainId.Solana]: SolanaConfig;
+  [ChainId.Sei]: EVMChainConfig;
 }

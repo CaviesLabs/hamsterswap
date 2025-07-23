@@ -3,9 +3,7 @@ import "@hamsterbox/ui-kit/dist/cjs/styles/css/main.css";
 import Script from "next/script";
 import makeStore from "@/src/redux";
 import type { AppProps } from "next/app";
-import {
-  FC,
-} from "react";
+import { FC } from "react";
 import { Provider } from "react-redux";
 import { ThemeProvider } from "@hamsterbox/ui-kit";
 import { MainProvider } from "@/src/hooks/pages/main";

@@ -1,13 +1,13 @@
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Between, EntityManager, In, Repository } from 'typeorm';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { DateTime } from 'luxon';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { EvmParser } from './evm.parser';
 import { SwapProposalModel } from '../../../orm/model/swap-proposal.model';
 import { ChainId } from '../../entities/swap-platform-config.entity';
 import { SwapProposalStatus } from '../../entities/swap-proposal.entity';
+import { DateTime } from 'luxon';
 
 export class EvmSyncProposalService {
   constructor(
@@ -51,11 +51,11 @@ export class EvmSyncProposalService {
       where: [
         {
           ownerAddress: ownerAddress,
-          chainId: In([ChainId.Klaytn]),
+          chainId: In([ChainId.Sei]),
         },
         {
           fulfillBy: ownerAddress,
-          chainId: In([ChainId.Klaytn]),
+          chainId: In([ChainId.Sei]),
         },
       ],
       relations: { offerItems: true, swapOptions: { items: true } },
@@ -81,51 +81,51 @@ export class EvmSyncProposalService {
 
   @Cron(CronExpression.EVERY_MINUTE)
   public syncAllJobs() {
-    // return this.entityManager.transaction(async () => {
-    //   const startedAt = DateTime.now();
-    //   console.info(
-    //     `==========Sync All EVM Proposals Started@${startedAt.toISO()}==========`,
-    //   );
+    return this.entityManager.transaction(async () => {
+      const startedAt = DateTime.now();
+      console.info(
+        `==========Sync All EVM Proposals Started@${startedAt.toISO()}==========`,
+      );
 
-    //   const proposals = await this.entityManager.find(SwapProposalModel, {
-    //     where: {
-    //       status: In([
-    //         SwapProposalStatus.CREATED,
-    //         SwapProposalStatus.DEPOSITED,
-    //         SwapProposalStatus.FULFILLED,
-    //         SwapProposalStatus.CANCELED,
-    //       ]),
-    //       updatedAt: Between(
-    //         startedAt.minus({ weeks: 1 }).toJSDate(),
-    //         startedAt.minus({ minutes: 5 }).toJSDate(),
-    //       ),
-    //       chainId: In([ChainId.Klaytn]),
-    //     },
-    //     relations: { offerItems: true, swapOptions: { items: true } },
-    //   });
+      const proposals = await this.entityManager.find(SwapProposalModel, {
+        where: {
+          status: In([
+            SwapProposalStatus.CREATED,
+            SwapProposalStatus.DEPOSITED,
+            SwapProposalStatus.FULFILLED,
+            SwapProposalStatus.CANCELED,
+          ]),
+          updatedAt: Between(
+            startedAt.minus({ weeks: 1 }).toJSDate(),
+            startedAt.minus({ minutes: 5 }).toJSDate(),
+          ),
+          chainId: In([ChainId.Sei]),
+        },
+        relations: { offerItems: true, swapOptions: { items: true } },
+      });
 
-    //   const onChainProposals =
-    //     await this.evmParser.fetchMultipleProposalsFromOnChainData(
-    //       ChainId.Klaytn,
-    //       proposals,
-    //     );
+      const onChainProposals =
+        await this.evmParser.fetchMultipleProposalsFromOnChainData(
+          ChainId.Sei,
+          proposals,
+        );
 
-    //   await Promise.all(
-    //     onChainProposals.map(async (proposal) => {
-    //       try {
-    //         await this.entityManager.save(SwapProposalModel, proposal, {});
-    //         console.log(`Synced completed for: ${proposal.id}`);
-    //       } catch (e) {
-    //         console.log('ERROR: Sync proposal failed', e);
-    //       }
-    //     }),
-    //   );
+      await Promise.all(
+        onChainProposals.map(async (proposal) => {
+          try {
+            await this.entityManager.save(SwapProposalModel, proposal, {});
+            console.log(`Synced completed for: ${proposal.id}`);
+          } catch (e) {
+            console.log('ERROR: Sync proposal failed', e);
+          }
+        }),
+      );
 
-    //   const endedAt = DateTime.now();
-    //   const { seconds } = endedAt.diff(startedAt, 'seconds').toObject();
-    //   console.info(
-    //     `==========Sync All EVM Proposals Ended@${endedAt.toISO()} Take:${seconds}s==========`,
-    //   );
-    // });
+      const endedAt = DateTime.now();
+      const { seconds } = endedAt.diff(startedAt, 'seconds').toObject();
+      console.info(
+        `==========Sync All EVM Proposals Ended@${endedAt.toISO()} Take:${seconds}s==========`,
+      );
+    });
   }
 }
