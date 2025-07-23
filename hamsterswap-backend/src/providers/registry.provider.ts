@@ -378,6 +378,29 @@ export class RegistryProvider {
             collectionId: 'the-farmors-1',
             name: 'The Farmors',
           },
+          {
+            marketUrl:
+              'https://magiceden.io/collections/sei/0x368243ab380a664d55d64232ff20d2caa85cdb84',
+            addresses: ['0x368243ab380a664d55d64232ff20d2caa85cdb84'],
+            icon: 'https://img-cdn.magiceden.dev/rs:fill:400:0:0/plain/https%3A%2F%2Fimg.reservoir.tools%2Fimages%2Fv2%2Fsei%2FmlW7AvaWRvTlZvCoiaVc4eymqUAVGL0RrXv4xmjWFYZFFXu%252BzWXbs28TktH9o43vpiZTwETmJjXAFTz9hNbtGV2%252Bokor%252B1NjCajjtydMzGROJLWJYtoOkMZ9N6P%252FID63',
+            collectionId: '0x368243ab380a664d55d64232ff20d2caa85cdb84',
+            name: 'Pixel Thumbs',
+          },
+          {
+            marketUrl:
+              'https://magiceden.io/collections/sei/0xe6f70aa873d0c42cf17df178cefd893a2c5031b0',
+            addresses: ['0xe6f70aa873d0c42cf17df178cefd893a2c5031b0'],
+            icon: 'https://img-cdn.magiceden.dev/rs:fill:400:0:0/plain/https%3A%2F%2Fimg.reservoir.tools%2Fimages%2Fv2%2Fsei%2Fz9JRSpLYGu7%252BCZoKWtAuAGdWptlhC4UVqExq%252BIguqyGbz%252FhlMy395t3pRVDeXTfGHiE7dHVqP%252BYlFQwlNbmrhohmmcttMX829bRxUEXLAgv8Nv0DaDjA9TlnuS8SmBV6I3FKfTRRDOstEm2jtdlktA%253D%253D',
+            collectionId: '0xe6f70aa873d0c42cf17df178cefd893a2c5031b0',
+            name: 'Warp Bois',
+          },
+          {
+            marketUrl: 'https://magiceden.io/collections/sei/theghostsei',
+            addresses: ['0x80958DC45286f460eCbd174FD74e832Dd13AFED6'],
+            icon: 'https://img-cdn.magiceden.dev/rs:fill:400:0:0/plain/https%3A%2F%2Fbafkreihzuw6ldhsbxalj5534gxyzixwy55vbjqhj65j6uurnv2ztdgnzeq.ipfs.w3s.link%2F',
+            collectionId: 'theghostsei',
+            name: 'TheGhostSei',
+          },
         ],
       },
       // [ChainId.Solana]: {

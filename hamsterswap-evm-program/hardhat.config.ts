@@ -109,6 +109,13 @@ if (privateKey) {
       gasPrice: "auto",
       chainId: 8217,
     },
+    sei: {
+      url: "https://evm-rpc.sei-apis.com",
+      accounts: [privateKey],
+      gas: "auto",
+      gasPrice: "auto",
+      chainId: 1329,
+    },
   };
 }
 

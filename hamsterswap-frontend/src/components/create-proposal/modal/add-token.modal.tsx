@@ -33,10 +33,13 @@ export const AddTokenModal: FC<
   const { offferedItems } = useCreateProposal();
   const [value, setValue] = useState("");
   const [dropDown, setDropdown] = useState(false);
-  const [addressSelected, setAddressSelected] = useState(WSOL_ADDRESS);
   const [balances, setBalances] = useState<
     { address: string; balance: number }[]
   >([]);
+  const [addressSelected, setAddressSelected] = useState(
+    platformConfig?.allowCurrencies.find((e) => e.isNativeToken)?.address ||
+      WSOL_ADDRESS
+  );
 
   /**
    * @dev Get token info by address which user selected.
@@ -103,14 +106,11 @@ export const AddTokenModal: FC<
     const balances = await Promise.all(
       platformConfig?.allowCurrencies?.map(async (token) => ({
         address: token.address,
-        balance:
-          token.address === WSOL_ADDRESS
-            ? nativeBalance
-            : await TokenService.getService(chainId).getTokenBalanceOf(
-                walletAddress,
-                token.realAddress,
-                token.realDecimals
-              ),
+        balance: await TokenService.getService(chainId).getTokenBalanceOf(
+          walletAddress,
+          token.realAddress,
+          token.realDecimals
+        ),
       }))
     );
 

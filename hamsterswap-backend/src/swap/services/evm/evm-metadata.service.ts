@@ -6,6 +6,7 @@ import { TokenMetadataModel } from '../../../orm/model/token-metadata.model';
 import { NetworkProvider } from '../../../providers/network.provider';
 import { OpenSeaProvider } from '../../../providers/opensea.provider';
 import { DebankProvider } from '../../../providers/debank.provider';
+import { SeitraceProvider } from '../../../providers/seitrace.provider';
 import {
   NFTMetadata,
   TokenMetadata,
@@ -17,6 +18,8 @@ import { RegistryProvider } from '../../../providers/registry.provider';
 export class EvmMetadataService {
   private readonly openseaProvider: OpenSeaProvider;
   private readonly debankProvider: DebankProvider;
+  private readonly seitraceProvider: SeitraceProvider;
+
   constructor(
     @InjectRepository(TokenMetadataModel)
     private readonly tokenMetadataRepo: Repository<TokenMetadataModel>,
@@ -31,10 +34,14 @@ export class EvmMetadataService {
       this.registry,
       this.networkProvider,
     );
+    this.seitraceProvider = new SeitraceProvider(
+      this.registry,
+      this.networkProvider,
+    );
   }
 
   /**
-   * @notice Get token metadata from opensea
+   * @notice Get NFT metadata - uses Seitrace for Sei chain, OpenSea for others
    * @param chainId
    * @param contractAddress
    * @param tokenId
@@ -52,6 +59,153 @@ export class EvmMetadataService {
       return existedTokenMetadata;
     }
 
+    // Use Seitrace for Sei chain
+    if (chainId === ChainId.Sei) {
+      return this.getSeiNftMetadata(chainId, contractAddress, tokenId);
+    }
+
+    // Use OpenSea for other chains
+    return this.getOpenSeaNftMetadata(chainId, contractAddress, tokenId);
+  }
+
+  /**
+   * @notice Get token metadata - uses Seitrace for Sei chain, Debank for others
+   * @param chainId
+   * @param tokenAddress
+   */
+  public async getTokenMetadata(
+    chainId: ChainId,
+    tokenAddress: string,
+  ): Promise<TokenMetadataModel> {
+    const existedTokenMetadata = await this.tokenMetadataRepo.findOneBy({
+      mintAddress: `${chainId}:${tokenAddress}`,
+    });
+
+    if (existedTokenMetadata) {
+      return existedTokenMetadata;
+    }
+
+    // Use Seitrace for Sei chain
+    if (chainId === ChainId.Sei) {
+      return this.getSeiTokenMetadata(chainId, tokenAddress);
+    }
+
+    // Use Debank for other chains
+    return this.getDebankTokenMetadata(chainId, tokenAddress);
+  }
+
+  /**
+   * @notice Get NFT metadata from Seitrace for Sei chain
+   * @param chainId
+   * @param contractAddress
+   * @param tokenId
+   * @private
+   */
+  private async getSeiNftMetadata(
+    chainId: ChainId,
+    contractAddress: string,
+    tokenId: string,
+  ): Promise<TokenMetadataModel> {
+    try {
+      // Get ERC721 token info from Seitrace
+      const tokenInfo = await this.seitraceProvider.getErc721TokenInfo({
+        chain_id: 'pacific-1', // Default to pacific-1, could be made configurable
+        contract_address: contractAddress,
+      });
+
+      // Get specific token instances to find the token
+      const tokenInstances = await this.seitraceProvider.getErc721Balances({
+        chain_id: 'pacific-1',
+        address: contractAddress, // This might need adjustment based on actual usage
+        token_contract_list: [contractAddress],
+        limit: 50,
+      });
+
+      const tokenInstance = tokenInstances.items.find(
+        (token) => token.token_id === tokenId,
+      );
+
+      const collection = this.registry.findCollection(chainId, contractAddress);
+
+      const nftMetadata: NFTMetadata = {
+        id: tokenId,
+        tokenId: Number(tokenId),
+        address: contractAddress,
+        attributes: tokenInstance?.token_metadata
+          ? this.parseNftAttributes(tokenInstance.token_metadata)
+          : [],
+        image: tokenInstance?.token_metadata
+          ? this.extractImageFromMetadata(tokenInstance.token_metadata)
+          : '',
+        name: tokenInfo.token_name || `${tokenInfo.token_symbol} #${tokenId}`,
+        collectionId: `${chainId}:${contractAddress}`,
+        collectionSlug: tokenInfo.token_symbol.toLowerCase(),
+        isWhiteListed: !!collection,
+        collectionName: collection?.name || tokenInfo.token_name,
+        collectionUrl: collection?.marketUrl,
+        chainId,
+      };
+
+      return this.persistNftMetadata(chainId, contractAddress, nftMetadata);
+    } catch (error) {
+      console.error(
+        `Failed to get Sei NFT metadata for ${contractAddress}:${tokenId}:`,
+        error,
+      );
+      // Fallback to basic metadata
+      return this.createFallbackNftMetadata(chainId, contractAddress, tokenId);
+    }
+  }
+
+  /**
+   * @notice Get token metadata from Seitrace for Sei chain
+   * @param chainId
+   * @param tokenAddress
+   * @private
+   */
+  private async getSeiTokenMetadata(
+    chainId: ChainId,
+    tokenAddress: string,
+  ): Promise<TokenMetadataModel> {
+    try {
+      const tokenInfo = await this.seitraceProvider.getErc20TokenInfo({
+        chain_id: 'pacific-1', // Default to pacific-1, could be made configurable
+        contract_address: tokenAddress,
+      });
+
+      const tokenMetadata: TokenMetadata = {
+        icon: tokenInfo.token_logo || '',
+        name: tokenInfo.token_name,
+        symbol: tokenInfo.token_symbol,
+        address: tokenAddress,
+        decimals: parseInt(tokenInfo.token_decimals),
+        isWhiteListed: !!this.registry.findToken(chainId, tokenAddress),
+        chainId,
+      };
+
+      return this.persistTokenMetadata(chainId, tokenAddress, tokenMetadata);
+    } catch (error) {
+      console.error(
+        `Failed to get Sei token metadata for ${tokenAddress}:`,
+        error,
+      );
+      // Fallback to basic metadata
+      return this.createFallbackTokenMetadata(chainId, tokenAddress);
+    }
+  }
+
+  /**
+   * @notice Get NFT metadata from OpenSea (fallback for non-Sei chains)
+   * @param chainId
+   * @param contractAddress
+   * @param tokenId
+   * @private
+   */
+  private async getOpenSeaNftMetadata(
+    chainId: ChainId,
+    contractAddress: string,
+    tokenId: string,
+  ): Promise<TokenMetadataModel> {
     const { nft: data } = await this.openseaProvider.getOpenSeaNftData(
       chainId,
       contractAddress,
@@ -79,22 +233,15 @@ export class EvmMetadataService {
   }
 
   /**
-   * @notice Get token metadata from debank
+   * @notice Get token metadata from Debank (fallback for non-Sei chains)
    * @param chainId
    * @param tokenAddress
+   * @private
    */
-  public async getTokenMetadata(
+  private async getDebankTokenMetadata(
     chainId: ChainId,
     tokenAddress: string,
   ): Promise<TokenMetadataModel> {
-    const existedTokenMetadata = await this.tokenMetadataRepo.findOneBy({
-      mintAddress: `${chainId}:${tokenAddress}`,
-    });
-
-    if (existedTokenMetadata) {
-      return existedTokenMetadata;
-    }
-
     const data = await this.debankProvider.getTokenInfo(chainId, tokenAddress);
 
     const tokenMetadata: TokenMetadata = {
@@ -103,6 +250,89 @@ export class EvmMetadataService {
       symbol: data.symbol,
       address: tokenAddress,
       decimals: data.decimals,
+      isWhiteListed: !!this.registry.findToken(chainId, tokenAddress),
+      chainId,
+    };
+
+    return this.persistTokenMetadata(chainId, tokenAddress, tokenMetadata);
+  }
+
+  /**
+   * @notice Parse NFT attributes from metadata string
+   * @param metadataString
+   * @private
+   */
+  private parseNftAttributes(metadataString: string): any[] {
+    try {
+      const metadata = JSON.parse(metadataString);
+      return metadata.attributes || [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * @notice Extract image URL from metadata string
+   * @param metadataString
+   * @private
+   */
+  private extractImageFromMetadata(metadataString: string): string {
+    try {
+      const metadata = JSON.parse(metadataString);
+      return metadata.image || metadata.image_url || '';
+    } catch {
+      return '';
+    }
+  }
+
+  /**
+   * @notice Create fallback NFT metadata when Seitrace fails
+   * @param chainId
+   * @param contractAddress
+   * @param tokenId
+   * @private
+   */
+  private createFallbackNftMetadata(
+    chainId: ChainId,
+    contractAddress: string,
+    tokenId: string,
+  ): Promise<TokenMetadataModel> {
+    const collection = this.registry.findCollection(chainId, contractAddress);
+
+    const nftMetadata: NFTMetadata = {
+      id: tokenId,
+      tokenId: Number(tokenId),
+      address: contractAddress,
+      attributes: [],
+      image: '',
+      name: `Token #${tokenId}`,
+      collectionId: `${chainId}:${contractAddress}`,
+      collectionSlug: contractAddress.toLowerCase(),
+      isWhiteListed: !!collection,
+      collectionName: collection?.name || 'Unknown Collection',
+      collectionUrl: collection?.marketUrl,
+      chainId,
+    };
+
+    return this.persistNftMetadata(chainId, contractAddress, nftMetadata);
+  }
+
+  /**
+   * @notice Create fallback token metadata when Seitrace fails
+   * @param chainId
+   * @param tokenAddress
+   * @private
+   */
+  private createFallbackTokenMetadata(
+    chainId: ChainId,
+    tokenAddress: string,
+  ): Promise<TokenMetadataModel> {
+    const tokenMetadata: TokenMetadata = {
+      icon: '',
+      name: 'Unknown Token',
+      symbol: 'UNKNOWN',
+      address: tokenAddress,
+      decimals: 18, // Default decimals
       isWhiteListed: !!this.registry.findToken(chainId, tokenAddress),
       chainId,
     };

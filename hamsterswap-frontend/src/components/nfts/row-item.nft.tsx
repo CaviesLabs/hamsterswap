@@ -4,6 +4,7 @@ import { NFTDetailsModal } from "../modal";
 import { DetailIcon, VerticalDots } from "@/src/components/icons";
 import { SwapItemType } from "@/src/entities/proposal.entity";
 import useOnClickOutside from "@/src/hooks/useOnClickOutside";
+import { useMain } from "@/src/hooks/pages/main";
 
 export const RowNftItem: FC<RowNftItemProps> = (props) => {
   const { assetType } = props;
@@ -13,6 +14,7 @@ export const RowNftItem: FC<RowNftItemProps> = (props) => {
   const isGameItem = assetType === SwapItemType.GAME;
 
   const [collapse, setCollapse] = useState(false);
+  const { platformConfig } = useMain();
 
   /**
    * @dev handle open modal by asset type
@@ -33,14 +35,19 @@ export const RowNftItem: FC<RowNftItemProps> = (props) => {
       <div className="bg-white duration-500 flex rounded-[16px] p-[16px]">
         <div className="left pl-[2px]">
           <img
-            src={props.image}
+            src={
+              props.image ||
+              platformConfig?.allowNTFCollections?.find(
+                (item) => item.addresses[0] === props.address
+              )?.icon
+            }
             alt="NFT image"
             className="h-full !w-[80px] object-cover rounded-[8px] aspect-square"
           />
         </div>
         <div className="px-4 w-72 left">
           <p className="text-lg semi-bold text-black truncate block capitalize">
-            {props.name}
+            {props.collectionName} {props.tokenId && `#${props.tokenId}`}
           </p>
           <div className="flex items-center">
             {!isSol && (

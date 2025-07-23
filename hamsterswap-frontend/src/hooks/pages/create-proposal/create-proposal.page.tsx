@@ -9,7 +9,6 @@ import {
 } from "@/src/entities/proposal.entity";
 import { SwapProgramService } from "@/src/services/swap-program.service";
 import { BN } from "@project-serum/anchor";
-import { PublicKey } from "@solana/web3.js";
 import { useSubmitProposalEvm } from "./useSubmitProposalEvm";
 import { useMain } from "../main";
 
@@ -53,7 +52,6 @@ export const CreateProposalProvider = (props: { children: ReactNode }) => {
               nftId: item.nftId,
               assetType: item.assetType,
               id: SwapProgramService.generateUID(),
-              mintAccount: new PublicKey(item.address),
               itemType: { [type]: {} },
               amount: amount
                 ? new BN(amount * Math.pow(10, item.decimals))
@@ -102,7 +100,6 @@ export const CreateProposalProvider = (props: { children: ReactNode }) => {
           id: SwapProgramService.generateUID(),
           nftId: item?.nftId,
           assetType: item?.assetType,
-          mintAccount: new PublicKey(item.address),
           itemType: { [type]: {} },
           amount: amount ? new BN(amount * Math.pow(10, item.decimals)) : null,
           nft_address: item.address,

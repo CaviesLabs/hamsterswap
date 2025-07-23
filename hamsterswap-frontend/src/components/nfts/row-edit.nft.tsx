@@ -45,7 +45,10 @@ export const RowEditNftItem: FC<RowNftEditItemProps> = (props) => {
                   ? platformConfig?.allowCurrencies?.find(
                       (item) => item.address === props.address
                     )?.icon
-                  : props.image
+                  : props.image ||
+                    platformConfig?.allowNTFCollections?.find(
+                      (item) => item.addresses[0] === props.address
+                    )?.icon
               }
               alt="NFT image"
               className={classnames(

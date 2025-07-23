@@ -44,7 +44,7 @@ export enum SwapItemStatus {
 /** @dev Expose stuff item. */
 export class StuffItemEntity {
   id: string;
-  mintAccount: PublicKey;
+  mintAccount?: PublicKey;
   amount: BN;
   itemType: {
     [key: string]: any;

@@ -13,7 +13,7 @@ import { completedOrderPercent, DATE_TIME_FORMAT } from "@/src/utils";
 import { SwapProposalStatus } from "@/src/entities/proposal.entity";
 import { useProgram } from "@/src/hooks/useProgram";
 import { useWallet } from "@/src/hooks/useWallet";
-import { RedeemButton } from "@/src/components/user/redeem-button";
+// import { RedeemButton } from "@/src/components/user/redeem-button";
 import { useProfilePage } from "@/src/hooks/pages/profile";
 import classnames from "classnames";
 import ProposalItems from "@/src/components/proposal-item/proposal-items";
@@ -23,7 +23,7 @@ import { useMain } from "@/src/hooks/pages/main";
 
 export const ProposalDetail: FC<ProposalDetailProps> = (props) => {
   /** @todo Get all data from @var {props} */
-  const { data, status, isGuaranteedPayment, proposalId } = props;
+  const { data, status, isGuaranteedPayment } = props;
 
   const { hPublicProfile: profile, chainId } = useMain();
   const router = useRouter();
@@ -216,11 +216,11 @@ export const ProposalDetail: FC<ProposalDetailProps> = (props) => {
               <div className="flex justify-center">
                 {isOwner && (
                   <div className="h-full">
-                    <RedeemButton
-                      status={status}
-                      proposalId={proposalId}
-                      isOwner={isOwner}
-                    />
+                    {/*<RedeemButton*/}
+                    {/*  status={status}*/}
+                    {/*  proposalId={proposalId}*/}
+                    {/*  isOwner={isOwner}*/}
+                    {/*/>*/}
                     {status.valueOf() !==
                       SwapProposalStatus.WITHDRAWN.valueOf() &&
                       isExpired && (

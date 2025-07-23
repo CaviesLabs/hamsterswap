@@ -65,6 +65,7 @@ export const AddExpectedNftModal: FC<AddExpectedItemModalProps> = (props) => {
    * @param nftItem
    */
   const handleAddNft = (nftItem: NftEntity) => {
+    toast.warn(`Add nft: ${JSON.stringify(nftItem)}`);
     if (expectedItems[props.index]?.askingItems.length === 4) {
       return toast.warn("Only a maximum of 4 items are allowed");
     }
@@ -88,7 +89,11 @@ export const AddExpectedNftModal: FC<AddExpectedItemModalProps> = (props) => {
       return toast.warn("Item is there in choice");
     }
 
-    if (offferedItems.map((_) => _.address).indexOf(nftItem.address) > -1) {
+    if (
+      offferedItems.map((_) => _.address).indexOf(nftItem.address) > -1 &&
+      // token id already in offered items
+      offferedItems.map((_) => _.tokenId).indexOf(nftItem.tokenId) > -1
+    ) {
       return toast.warn("Item is there in your offered list");
     }
 
