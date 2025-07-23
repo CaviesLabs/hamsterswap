@@ -56,7 +56,7 @@ export const MainProvider = (props: { children: ReactNode }) => {
    */
   useEffect(() => {
     const chainId =
-      (new StorageProvider().getItem("CHAIN_ID") as ChainId) || ChainId.solana;
+      (new StorageProvider().getItem("CHAIN_ID") as ChainId) || ChainId.sei;
     setChainId(chainId);
   }, []);
 

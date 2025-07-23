@@ -1,21 +1,9 @@
-import { createContext, useMemo, useCallback } from "react";
-import {
-  useWalletClient,
-  useBalance,
-  useAccount,
-  useSignMessage,
-  type WalletClient,
-} from "wagmi";
+import { useCallback, useMemo } from "react";
+import { WalletClient } from "viem";
+import { useAccount, useBalance, useSignMessage, useWalletClient } from "wagmi";
 import { getEvmContractService } from "@/src/services/evm-contract.service";
 import { BrowserProvider, JsonRpcSigner, MaxUint256 } from "ethers";
 import { useMain } from "@/src/hooks/pages/main";
-
-/** @dev Initialize context. */
-export const EvmWalletContext = createContext<{
-  nativeBalance: string;
-  walletAddress: string;
-  signer: unknown;
-}>(null);
 
 export function walletClientToSigner(walletClient: WalletClient) {
   const { account, chain, transport } = walletClient;
@@ -25,8 +13,7 @@ export function walletClientToSigner(walletClient: WalletClient) {
     ensAddress: chain.contracts?.ensRegistry?.address,
   };
   const provider = new BrowserProvider(transport as any, network);
-  const signer = new JsonRpcSigner(provider, account.address);
-  return signer;
+  return new JsonRpcSigner(provider, account.address);
 }
 
 /** Hook to convert a viem Wallet Client to an ethers.js Signer. */
@@ -44,9 +31,15 @@ export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
  * @returns {object} The object contains sign message function.
  */
 export const useSignEvmMessage = (message: string) => {
-  return useSignMessage({
-    message,
-  });
+  const { signMessageAsync } = useSignMessage();
+  const { address } = useAccount();
+  return useCallback(() => {
+    if (!address) throw new Error("Wallet address is not available.");
+    return signMessageAsync({
+      message,
+      account: address,
+    });
+  }, [signMessageAsync, address, message]);
 };
 
 export const useEvmContractService = () => {

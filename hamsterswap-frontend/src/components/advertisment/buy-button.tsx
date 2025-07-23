@@ -5,10 +5,10 @@ import {
   ConfirmTransactionModal,
   WalletEmptyModal,
 } from "@/src/components/modal";
-import { OptimizeTransactionModal } from "@/src/components/create-proposal/modal/optimize-transaction-modal";
+// import { OptimizeTransactionModal } from "@/src/components/create-proposal/modal/optimize-transaction-modal";
 import { useAppWallet, useConnect } from "@/src/hooks/useAppWallet";
 import { SwapItemEntity } from "@/src/entities/proposal.entity";
-import { ChainId } from "@/src/entities/chain.entity";
+// import { ChainId } from "@/src/entities/chain.entity";
 import { useMain } from "@/src/hooks/pages/main";
 import { getProposalService } from "@/src/services/proposal.service";
 
@@ -51,7 +51,7 @@ const BuyButton: FC<{
   /**
    * @dev Condition to show popup to optimize proposal and submit proposal onchain.
    */
-  const [optimizedProposalOpen, setOptimizedProposalOpen] = useState(false);
+  // const [optimizedProposalOpen, setOptimizedProposalOpen] = useState(false);
 
   const handleSwap = useCallback(async () => {
     console.log(walletAddress, proposal, props.optionIndex);
@@ -64,25 +64,21 @@ const BuyButton: FC<{
     setIsBuyButtonLoading(true);
     setIsDisplayConfirm(false);
 
-    if (chainId === ChainId.solana) {
-      setOptimizedProposalOpen(true);
-    } else {
-      try {
-        await props.handleSwap();
-        setTimeout(() => {
-          getProposalService().syncProposal(proposal.id);
-        }, 2000);
-        setIsDisplayConfirmed(true);
-      } catch (err) {
-        toast.error(
-          "“Please ensure that your wallet is equipped with the necessary items."
-        );
-        console.error("ERROR_SWAP_PROPOSAL", err);
-      } finally {
-        setIsDisplayConfirm(false);
-        setIsBuyButtonLoading(false);
-        setIsLoading(false);
-      }
+    try {
+      await props.handleSwap();
+      setTimeout(() => {
+        getProposalService().syncProposal(proposal.id);
+      }, 2000);
+      setIsDisplayConfirmed(true);
+    } catch (err) {
+      toast.error(
+        "“Please ensure that your wallet is equipped with the necessary items."
+      );
+      console.error("ERROR_SWAP_PROPOSAL", err);
+    } finally {
+      setIsDisplayConfirm(false);
+      setIsBuyButtonLoading(false);
+      setIsLoading(false);
     }
   }, [walletAddress, proposal, props.optionIndex, chainId]);
 
@@ -127,31 +123,31 @@ const BuyButton: FC<{
         handleCancel={() => setIsTransFailed(false)}
         isModalOpen={isTransFailed}
       />
-      <OptimizeTransactionModal
-        isModalOpen={optimizedProposalOpen}
-        instructionHandler={async () =>
-          (await props.handleSwap()) as unknown as {
-            proposalId?: string;
-            fnc: {
-              optimize(): Promise<void>;
-              confirm(): Promise<void>;
-            };
-          }
-        }
-        handleCancel={() => {
-          setOptimizedProposalOpen(false);
-          setIsBuyButtonLoading(false);
-          setIsLoading(false);
-        }}
-        handleOk={(proposalId) => {
-          console.log(proposalId);
-          setOptimizedProposalOpen(false);
-          setIsDisplayConfirm(false);
-          setIsDisplayConfirmed(true);
-          setIsBuyButtonLoading(false);
-          setIsLoading(false);
-        }}
-      />
+      {/*<OptimizeTransactionModal*/}
+      {/*  isModalOpen={optimizedProposalOpen}*/}
+      {/*  instructionHandler={async () =>*/}
+      {/*    (await props.handleSwap()) as unknown as {*/}
+      {/*      proposalId?: string;*/}
+      {/*      fnc: {*/}
+      {/*        optimize(): Promise<void>;*/}
+      {/*        confirm(): Promise<void>;*/}
+      {/*      };*/}
+      {/*    }*/}
+      {/*  }*/}
+      {/*  handleCancel={() => {*/}
+      {/*    setOptimizedProposalOpen(false);*/}
+      {/*    setIsBuyButtonLoading(false);*/}
+      {/*    setIsLoading(false);*/}
+      {/*  }}*/}
+      {/*  handleOk={(proposalId) => {*/}
+      {/*    console.log(proposalId);*/}
+      {/*    setOptimizedProposalOpen(false);*/}
+      {/*    setIsDisplayConfirm(false);*/}
+      {/*    setIsDisplayConfirmed(true);*/}
+      {/*    setIsBuyButtonLoading(false);*/}
+      {/*    setIsLoading(false);*/}
+      {/*  }}*/}
+      {/*/>*/}
     </>
   );
 };

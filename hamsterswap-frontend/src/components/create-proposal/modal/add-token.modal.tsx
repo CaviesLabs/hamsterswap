@@ -10,7 +10,6 @@ import {
 import { Input, Modal, Dropdown } from "antd";
 import { StyledModal } from "@/src/components/create-proposal/modal/add-nft.styled";
 import { DropdownIcon } from "@/src/components/icons";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { WSOL_ADDRESS } from "@/src/utils/constants";
 import { TokenItem } from "../token-select-item";
 import { AddItemModalProps } from "./types";
@@ -21,17 +20,6 @@ import { TokenService } from "@/src/services/token.service";
 import { TokenEntity } from "@/src/entities/platform-config.entity";
 import UtilsProvider from "@/src/utils/utils.provider";
 import { useMain } from "@/src/hooks/pages/main";
-
-const decimalCount = (num: any) => {
-  // Convert to String
-  const numStr = `${num}`;
-  // String Contains Decimal
-  if (numStr.includes(".")) {
-    return numStr.split(".")[1].length;
-  }
-  // String Does Not Contain Decimal
-  return 0;
-};
 
 export const AddTokenModal: FC<
   AddItemModalProps & {
@@ -98,14 +86,7 @@ export const AddTokenModal: FC<
     )
       return;
     if (!isNaN(+e.target.value)) {
-      if (decimalCount(+e.target.value) > 8) {
-        const val = `${
-          Math.round(+e.target.value * LAMPORTS_PER_SOL) / LAMPORTS_PER_SOL
-        }`;
-        setValue(val);
-      } else {
-        setValue(`${e.target.value}`);
-      }
+      setValue(`${e.target.value}`);
     } else {
       setValue(`${e.target.value}`);
     }

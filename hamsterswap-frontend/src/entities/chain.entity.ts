@@ -6,7 +6,7 @@
  */
 export enum ChainId {
   solana = "solana",
-  klaytn = "klaytn",
+  sei = "sei",
 }
 
 /**
@@ -31,7 +31,7 @@ export enum IdpShortName {
  */
 export const IdpShortNameMap: Record<ChainId, IdpShortName> = {
   [ChainId.solana]: IdpShortName.SolanaWallet,
-  [ChainId.klaytn]: IdpShortName.EVMWallet,
+  [ChainId.sei]: IdpShortName.EVMWallet,
 };
 /**
  * @type ChainEntity
@@ -53,17 +53,17 @@ export type ChainEntity = {
  * @see src/entities/chain.entity.ts
  */
 export const DEFAULT_CHAINS = [
-  {
-    chainId: ChainId.solana,
-    logo: "https://assets.coingecko.com/coins/images/4128/small/solana.png",
-    name: "SOLANA",
-    rpcUrl:
-      "https://silent-twilight-wildflower.solana-mainnet.quiknode.pro/82f3034e016e3b800a8e2fc6d00efe9e270c046b/",
-  },
   // {
-  //   chainId: ChainId.klaytn,
-  //   logo: "https://assets.coingecko.com/coins/images/9672/small/klaytn.png?1660288824",
-  //   name: "KLAYTN",
-  //   rpcUrl: "https://klaytn.api.onfinality.io/public",
+  //   chainId: ChainId.solana,
+  //   logo: "https://assets.coingecko.com/coins/images/4128/small/solana.png",
+  //   name: "SOLANA",
+  //   rpcUrl:
+  //     "https://silent-twilight-wildflower.solana-mainnet.quiknode.pro/82f3034e016e3b800a8e2fc6d00efe9e270c046b/",
   // },
+  {
+    chainId: ChainId.sei,
+    logo: "https://seitrace.com/images/sei.svg",
+    name: "sei",
+    rpcUrl: "https://evm-rpc.sei-apis.com",
+  },
 ] as ChainEntity[];

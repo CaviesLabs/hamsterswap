@@ -61,6 +61,8 @@ export class AuthService {
       signature: signedData,
     };
 
+    console.log("basePayload", basePayload);
+
     const userCredentials = await networkProvider
       .request(`/user/idp/${IdpShortNameMap[chainId]}/availability/check`, {
         method: "POST",

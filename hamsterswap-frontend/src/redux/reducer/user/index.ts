@@ -3,7 +3,7 @@ import { SET_CHAIN_ID } from "@/src/redux/actions";
 import { Action } from "@/src/redux/entities/interfaces/action";
 
 export const chainIdReducer = (
-  state: ChainId = ChainId.solana,
+  state: ChainId = ChainId.sei,
   action: Action
 ) => {
   if (action.type === SET_CHAIN_ID) {

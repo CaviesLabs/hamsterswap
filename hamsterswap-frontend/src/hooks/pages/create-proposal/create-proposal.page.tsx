@@ -10,8 +10,6 @@ import {
 import { SwapProgramService } from "@/src/services/swap-program.service";
 import { BN } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { ChainId } from "@/src/entities/chain.entity";
-import { useSubmitProposalSol } from "./useSubmitProposalSol";
 import { useSubmitProposalEvm } from "./useSubmitProposalEvm";
 import { useMain } from "../main";
 
@@ -152,16 +150,13 @@ export const CreateProposalProvider = (props: { children: ReactNode }) => {
  */
 export const useSubmitProposal = () => {
   const { chainId } = useMain();
-  const { submit: submitSol } = useSubmitProposalSol();
   const { submit: submitEvm } = useSubmitProposalEvm();
 
   return useMemo(() => {
     return {
       submit: async () => {
-        // eslint-disable-next-line prettier/prettier
-        if (chainId === ChainId.solana) return await submitSol();
         return await submitEvm();
       },
     };
-  }, [chainId, submitSol, submitEvm]);
+  }, [chainId, submitEvm]);
 };

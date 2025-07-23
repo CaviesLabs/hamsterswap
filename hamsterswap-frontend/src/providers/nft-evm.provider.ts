@@ -1,5 +1,4 @@
 import { NftEntity, NftStatus } from "@/src/dto/nft.dto";
-import { Keypair } from "@solana/web3.js";
 
 export class NftEvmProvider {
   /**
@@ -12,7 +11,8 @@ export class NftEvmProvider {
       ...data,
       decimals: 0,
       status: NftStatus.holding,
-      address: Keypair.generate().publicKey.toString(),
+      // random string for evm address
+      address: data?.address || "0x" + Math.random().toString(16).slice(2, 10),
       realAddress: data?.address,
     };
   }

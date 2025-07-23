@@ -15,12 +15,12 @@ import { Carousel } from "react-responsive-carousel";
 import { Form } from "antd";
 import { useCreateProposal } from "@/src/hooks/pages/create-proposal";
 import { Step1, Step2, Step3, Step5 } from "@/src/components/create-proposal";
-import { OptimizeTransactionModal } from "@/src/components/create-proposal/modal/optimize-transaction-modal";
+// import { OptimizeTransactionModal } from "@/src/components/create-proposal/modal/optimize-transaction-modal";
 import { SubmitProposalEvmModal } from "@/src/components/create-proposal/modal/submit-proposal-evm.modal";
 import { StorageProvider } from "@/src/providers/storage.provider";
 import { useAppWallet } from "@/src/hooks/useAppWallet";
 import classnames from "classnames";
-import { ChainId } from "../entities/chain.entity";
+// import { ChainId } from "../entities/chain.entity";
 import { useMain } from "@/src/hooks/pages/main";
 
 const Layout: FC = () => {
@@ -241,54 +241,29 @@ const Layout: FC = () => {
                   size="large"
                 />
               )}
-              {chainId === ChainId.solana ? (
-                <OptimizeTransactionModal
-                  isModalOpen={submitModalOpen}
-                  instructionHandler={async () =>
-                    (await submitProposal()) as unknown as {
-                      proposalId?: string;
-                      fnc: {
-                        optimize(): Promise<void>;
-                        confirm(): Promise<void>;
-                      };
-                    }
-                  }
-                  handleCancel={() => {
+              <SubmitProposalEvmModal
+                isModalOpen={submitModalOpen}
+                handleCancel={() => {
+                  setSubmitModalOpen(false);
+                  setIsDuringSubmit(false);
+                }}
+                handleOk={async () => {
+                  try {
                     setSubmitModalOpen(false);
-                    setIsDuringSubmit(false);
-                  }}
-                  handleOk={(proposalId) => {
-                    setSubmitModalOpen(false);
-                    setProposalId(proposalId);
+                    const result = (await submitProposal()) as {
+                      proposalId: string;
+                      fnc: any;
+                    };
+                    setModalOpened(true);
+                    setProposalId(result.proposalId);
                     setModalOpened(true);
                     setIsDuringSubmit(false);
-                  }}
-                />
-              ) : (
-                <SubmitProposalEvmModal
-                  isModalOpen={submitModalOpen}
-                  handleCancel={() => {
-                    setSubmitModalOpen(false);
-                    setIsDuringSubmit(false);
-                  }}
-                  handleOk={async () => {
-                    try {
-                      setSubmitModalOpen(false);
-                      const result = (await submitProposal()) as {
-                        proposalId: string;
-                        fnc: any;
-                      };
-                      setModalOpened(true);
-                      setProposalId(result.proposalId);
-                      setModalOpened(true);
-                      setIsDuringSubmit(false);
-                    } catch (err) {
-                      console.error("ERROR_CREATE_PROPOSAL: ", err);
-                      toast.error("Create proposal failed, please try again.");
-                    }
-                  }}
-                />
-              )}
+                  } catch (err) {
+                    console.error("ERROR_CREATE_PROPOSAL: ", err);
+                    toast.error("Create proposal failed, please try again.");
+                  }
+                }}
+              />
             </div>
           </div>
         </LayoutSection>

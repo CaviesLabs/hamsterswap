@@ -4,8 +4,6 @@ import {
   PlatformConfigDtoV2,
 } from "@/src/entities/platform-config.entity";
 import { ChainId } from "@/src/entities/chain.entity";
-import { WSOL_ADDRESS } from "@/src/utils/constants";
-import { Keypair } from "@solana/web3.js";
 
 export class PlatformConfigService {
   /**
@@ -32,9 +30,8 @@ export class PlatformConfigService {
         icon: item.icon || item.image,
         realDecimals: item.decimals,
         realAddress: item.address,
-        address: item.isNativeToken
-          ? WSOL_ADDRESS
-          : Keypair.generate().publicKey.toString(),
+        address:
+          item?.address || "0x" + Math.random().toString(16).slice(2, 10),
       })),
     };
   }

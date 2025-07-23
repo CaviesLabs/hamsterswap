@@ -1,101 +1,69 @@
-import {
-  createContext,
-  useContext,
-  ReactNode,
-  FC,
-  useState,
-  useMemo,
-} from "react";
-import {
-  getDefaultWallets,
-  RainbowKitProvider,
-  lightTheme,
-} from "@rainbow-me/rainbowkit";
-import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { Chain, klaytn as WagmiKlaytn } from "wagmi/chains";
-import { alchemyProvider } from "wagmi/providers/alchemy";
-import { publicProvider } from "wagmi/providers/public";
+import { createContext, useContext, ReactNode, FC } from "react";
+import { RainbowKitProvider, lightTheme } from "@rainbow-me/rainbowkit";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider, http } from "wagmi";
+import { getDefaultConfig, Chain } from "@rainbow-me/rainbowkit";
 
 /**
- * @dev Override rpc urls for klaytn.
+ * @dev Override rpc urls for sei.
  * @notice The default rpc url is not working.
  * @notice This is temporary solution.
  * @returns {void}
  * @todo Remove this when rpc url is working.
  */
-const RPC_URL = "https://klaytn.blockpi.network/v1/rpc/public";
-const klaytn: Chain = {
-  ...WagmiKlaytn,
+const RPC_URL = "https://evm-rpc.sei-apis.com";
+const seiMainnet = {
+  id: 1329,
+  name: "sei-mainnet",
+  iconUrl: "https://seitrace.com/images/sei.svg",
+  iconBackground: "#fff",
+  nativeCurrency: { name: "Sei", symbol: "SEI", decimals: 18 },
   rpcUrls: {
-    default: {
-      http: [RPC_URL],
-    },
-    public: {
-      http: [RPC_URL],
+    default: { http: [RPC_URL] },
+  },
+  blockExplorers: {
+    default: { name: "SeiTrace", url: "https://seitrace.com" },
+  },
+  contracts: {
+    multicall3: {
+      address: "0xe50EbCf04083E4BDe13bbE0e5CA90595118F6cC3",
+      blockCreated: 133_773_701,
     },
   },
-};
+} as Chain;
+export const config = getDefaultConfig({
+  appName: "HamsterSwap",
+  projectId: process.env.WALLET_CONNECT_PROJECT_ID,
+  chains: [seiMainnet],
+  transports: {
+    [seiMainnet.id]: http(),
+  },
+});
+const queryClient = new QueryClient();
 
 /** @dev Initiize context. */
 export const WalletKitContext = createContext<any>(null);
 
 /** @dev Expose wallet provider for usage. */
 export const EvmWalletKitProvider: FC<{ children: ReactNode }> = (props) => {
-  const [wagmiChains, setWagmiChains] = useState<any[]>([]);
-
-  /**
-   * @dev Create config for wallet kit.
-   * @dev Update config here.
-   * @returns {void}
-   */
-  const clientConfig = useMemo(() => {
-    /**
-     * @dev Configure chains.
-     * @notice Get chains from wagmi.
-     * @notice Get providers from wagmi.
-     */
-    const { chains, publicClient } = configureChains(
-      [klaytn],
-      [alchemyProvider({ apiKey: process.env.ALCHEMY_ID }), publicProvider()]
-    );
-
-    /**
-     * @dev Get default wallets.
-     * @notice Get default wallets from wagmi.
-     * @notice Update config here.
-     */
-    const { connectors } = getDefaultWallets({
-      appName: "CabbageSwap",
-      projectId: process.env.WALLET_CONNECT_PROJECT_ID,
-      chains,
-    });
-
-    /** @dev Update config here */
-    setWagmiChains(chains);
-    return createConfig({
-      autoConnect: true,
-      connectors,
-      publicClient,
-    });
-  }, []);
-
   return (
     <WalletKitContext.Provider value={{}}>
-      <WagmiConfig config={clientConfig}>
-        <RainbowKitProvider
-          chains={wagmiChains}
-          coolMode={true}
-          theme={lightTheme({
-            accentColor: "#735CF7",
-            accentColorForeground: "white",
-            borderRadius: "small",
-            fontStack: "system",
-            overlayBlur: "small",
-          })}
-        >
-          {props.children}
-        </RainbowKitProvider>
-      </WagmiConfig>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider
+            coolMode={true}
+            theme={lightTheme({
+              accentColor: "#735CF7",
+              accentColorForeground: "white",
+              borderRadius: "small",
+              fontStack: "system",
+              overlayBlur: "small",
+            })}
+          >
+            {props.children}
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
     </WalletKitContext.Provider>
   );
 };

@@ -1,12 +1,11 @@
+"use client";
+
 import { FC, useMemo, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
-import { useWalletKit } from "@gokiprotocol/walletkit";
 import { Button } from "@hamsterbox/ui-kit";
 import { PURPLE_HEADER_PAGES } from "@/src/utils";
 import { HamsterboxIcon } from "@/src/components/icons";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { ChainId } from "@/src/entities/chain.entity";
-// import { ChainSelect } from "./chain-select";
 import UserProfile from "@/src/components/header/user-profile";
 import classnames from "classnames";
 import styles from "./index.module.scss";
@@ -35,7 +34,6 @@ const Header: FC = () => {
   /**
    * @dev Import GoGi providers.
    */
-  const { connect: openSolConnector } = useWalletKit();
   const { walletAddress } = useAppWallet();
   const { disconnect } = useDisconnectWallet();
 
@@ -144,7 +142,6 @@ const Header: FC = () => {
             </a>
           </div>
           <div className="relative flex items-center float-right right-[16px]">
-            {/* <ChainSelect /> */}
             <div className="float-right relative">
               {!hProfile ? (
                 <div className="relative">
@@ -157,8 +154,6 @@ const Header: FC = () => {
                           size="small"
                           text="Connect Wallet"
                           onClick={useCallback(async () => {
-                            // eslint-disable-next-line prettier/prettier
-                            if (chainId === ChainId.solana) return openSolConnector();
                             if (account) await disconnect();
                             return openEvmConnector();
                           }, [chainId, account])}

@@ -1,18 +1,13 @@
 import { useCallback, useMemo } from "react";
-import { ChainId } from "@/src/entities/chain.entity";
-import { useWallet as useSolWallet } from "@/src/hooks/useWallet";
-import * as bs from "bs58";
 import { SIGN_MESSAGE } from "@/src/utils";
 import { disconnect as disconnectWagmi } from "@wagmi/core";
 import { getAuthService } from "@/src/actions/auth.action";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { useEvmWallet, useSignEvmMessage } from "./wagmi";
+import { config, useEvmWallet, useSignEvmMessage } from "./wagmi";
 import { useDispatch, useSelector } from "react-redux";
 import { setProfile } from "@/src/redux/actions/hamster-profile/profile.action";
-import { useWalletKit } from "@gokiprotocol/walletkit";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { useMain } from "./pages/main";
 import State from "@/src/redux/entities/state";
+import { useMain } from "./pages/main";
 
 /**
  * @dev Get wallet address from useEvmWallet or useSolana
@@ -23,24 +18,16 @@ import State from "@/src/redux/entities/state";
 export const useAppWallet = () => {
   const { chainId } = useSelector((state: State) => state);
   const { walletAddress: evmAddress } = useEvmWallet();
-  const { solanaWallet } = useSolWallet();
 
   try {
-    (window as any).hashmail.identify(
-      chainId === ChainId.solana
-        ? solanaWallet?.publicKey?.toString()
-        : evmAddress
-    );
+    (window as any).hashmail.identify(evmAddress);
   } catch {}
 
   return useMemo(() => {
     return {
-      walletAddress:
-        chainId === ChainId.solana
-          ? solanaWallet?.publicKey?.toString()
-          : evmAddress,
+      walletAddress: evmAddress,
     };
-  }, [chainId, evmAddress, solanaWallet]);
+  }, [chainId, evmAddress]);
 };
 
 /**
@@ -67,15 +54,13 @@ export const useNativeToken = () => {
  */
 export const useIdpSignMessage = () => {
   const { chainId } = useSelector((state: State) => state);
-  const { signMessageAsync } = useSignEvmMessage(SIGN_MESSAGE);
-  const { signMessage } = useSolWallet();
+  const signMessage = useSignEvmMessage(SIGN_MESSAGE);
 
   return {
     signIdpMessage: useCallback(async () => {
       // eslint-disable-next-line prettier/prettier
-      if (chainId === ChainId.solana) return bs.encode(await signMessage(SIGN_MESSAGE));
-      return await signMessageAsync();
-    }, [chainId, signMessageAsync, signMessage]),
+      return signMessage();
+    }, [chainId, signMessage]),
   };
 };
 
@@ -87,19 +72,13 @@ export const useIdpSignMessage = () => {
  */
 export const useDisconnectWallet = () => {
   const { chainId } = useSelector((state: State) => state);
-  const { disconnect: disconnectGoki } = useSolWallet();
   const dispatch = useDispatch();
 
   return {
     disconnect: useCallback(async () => {
       await getAuthService().logout();
       dispatch(setProfile(null));
-      if (chainId === ChainId.solana) {
-        await disconnectGoki();
-      } else {
-        await disconnectWagmi();
-      }
-
+      await disconnectWagmi(config);
       try {
         (window as any).hashmail.disconnect();
       } catch {}
@@ -115,16 +94,9 @@ export const useDisconnectWallet = () => {
  */
 export const useNativeBalance = (): number => {
   const { chainId } = useSelector((state: State) => state);
-  const { solBalance } = useSolWallet();
   const { nativeBalance: evmBalance } = useEvmWallet();
 
-  return useMemo(
-    () =>
-      chainId === ChainId.solana
-        ? solBalance / LAMPORTS_PER_SOL
-        : parseFloat(evmBalance),
-    [chainId, solBalance, evmBalance]
-  );
+  return useMemo(() => parseFloat(evmBalance), [chainId, evmBalance]);
 };
 
 /**
@@ -135,13 +107,12 @@ export const useNativeBalance = (): number => {
  */
 export const useConnect = () => {
   const { chainId } = useSelector((state: State) => state);
-  const { connect: connectSol } = useWalletKit();
   const { openConnectModal: connectEvm } = useConnectModal();
 
   return useMemo(
     () => ({
-      connect: chainId === ChainId.solana ? connectSol : connectEvm,
+      connect: connectEvm,
     }),
-    [chainId, connectSol, connectEvm]
+    [chainId, connectEvm]
   );
 };

@@ -15,15 +15,11 @@ import { useProgram } from "@/src/hooks/useProgram";
 import { useWallet } from "@/src/hooks/useWallet";
 import { RedeemButton } from "@/src/components/user/redeem-button";
 import { useProfilePage } from "@/src/hooks/pages/profile";
-import { OptimizeTransactionModal } from "@/src/components/create-proposal/modal/optimize-transaction-modal";
 import classnames from "classnames";
 import ProposalItems from "@/src/components/proposal-item/proposal-items";
 import moment from "moment";
 import { useAppWallet } from "@/src/hooks/useAppWallet";
-import { ChainId } from "@/src/entities/chain.entity";
 import { useMain } from "@/src/hooks/pages/main";
-
-type Method = "cancel" | "widthdraw";
 
 export const ProposalDetail: FC<ProposalDetailProps> = (props) => {
   /** @todo Get all data from @var {props} */
@@ -83,15 +79,8 @@ export const ProposalDetail: FC<ProposalDetailProps> = (props) => {
   const { cancelProposal } = useProgram();
 
   /**
-   * @dev The method user want to cancel proposal, cancel situation & withdraw stituation.
-   */
-  const [method, setMethod] = useState<Method>();
-
-  /**
    * @dev Condition to show popup to optimize proposal and submit proposal onchain.
    */
-  const [optimizedProposalOpen, setOptimizedProposalOpen] = useState(false);
-
   /**
    * @dev Condition whether user want to use with optimize option.
    */
@@ -103,36 +92,28 @@ export const ProposalDetail: FC<ProposalDetailProps> = (props) => {
   /**
    * @dev The function to handle cancling proposal
    */
-  const handleCancleProposal = useCallback(
-    async (method: Method) => {
-      setIsDuringSubmitCancel(true);
-      if (chainId === ChainId.solana) {
-        setMethod(method);
-        setOptimizedProposalOpen(true);
-        setCancelModal(false);
-      } else {
-        try {
-          await cancelProposal(props.proposalId);
-          setCancelModal(false);
-          setCanceledModal(true);
-          handleFilter();
-        } catch (err) {
-          toast.error("Cancel proposal failed, please try again later.");
-          console.log(err);
-        } finally {
-          setIsDuringSubmitCancel(false);
-        }
-      }
-    },
-    [
-      props.proposalId,
-      router,
-      isOptimized,
-      walletAddress,
-      programService,
-      chainId,
-    ]
-  );
+  const handleCancelProposal = useCallback(async () => {
+    setIsDuringSubmitCancel(true);
+
+    try {
+      await cancelProposal(props.proposalId);
+      setCancelModal(false);
+      setCanceledModal(true);
+      handleFilter();
+    } catch (err) {
+      toast.error("Cancel proposal failed, please try again later.");
+      console.log(err);
+    } finally {
+      setIsDuringSubmitCancel(false);
+    }
+  }, [
+    props.proposalId,
+    router,
+    isOptimized,
+    walletAddress,
+    programService,
+    chainId,
+  ]);
 
   /**
    * @dev Handle close successfull canceled modal
@@ -246,7 +227,7 @@ export const ProposalDetail: FC<ProposalDetailProps> = (props) => {
                         <>
                           <Button
                             className="border-purple text-purple !border-2 px-10 rounded-3xl !h-full"
-                            onClick={() => handleCancleProposal("widthdraw")}
+                            onClick={() => handleCancelProposal()}
                             size="large"
                             text="Withdraw"
                             shape="secondary"
@@ -276,7 +257,7 @@ export const ProposalDetail: FC<ProposalDetailProps> = (props) => {
                         isLoading={isDuringSubmitCancel}
                         isModalOpen={cancelModal}
                         handleCancel={() => setCancelModal(false)}
-                        handleOk={() => handleCancleProposal("cancel")}
+                        handleOk={() => handleCancelProposal()}
                       />
                       <CanceledProposalModal
                         isModalOpen={canceledModal}
@@ -303,35 +284,6 @@ export const ProposalDetail: FC<ProposalDetailProps> = (props) => {
           </div>
         </div>
       </StyledProposalItem>
-      <OptimizeTransactionModal
-        isModalOpen={optimizedProposalOpen}
-        instructionHandler={async () =>
-          (await cancelProposal(props.proposalId)) as unknown as {
-            proposalId?: string;
-            fnc: {
-              optimize(): Promise<void>;
-              confirm(): Promise<void>;
-            };
-          }
-        }
-        handleCancel={() => {
-          setOptimizedProposalOpen(false);
-          setIsDuringSubmitCancel(false);
-        }}
-        handleOk={(proposalId) => {
-          console.log(proposalId);
-          setOptimizedProposalOpen(false);
-          if (method === "widthdraw") {
-            setWithdrewModal(true);
-          } else {
-            setCancelModal(false);
-            setCanceledModal(true);
-          }
-          setIsDuringSubmitCancel(false);
-        }}
-      />
-      {/* {isOptimized ? (
-      ) : null} */}
     </>
   );
 };
